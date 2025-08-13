@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile 
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db 
+    environment: 
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/student_db
+      SPRING_DATASOURCE_USERNAME: abdullah 
+      SPRING_DATASOURCE_PASSWORD: abdullah 
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  db:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment: 
+      POSTGRES_DB: student_db
+      POSTGRES_USER: abdullah 
+      POSTGRES_PASSWORD: abdullah
+    volumes:
+      - db-data:/var/lib/postgresql/data 
+
+volumes:
+  db-data:
