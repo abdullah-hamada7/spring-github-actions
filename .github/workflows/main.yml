@@ -1,36 +1,47 @@
 name: Build & Deploy Spring app
 
-on: #Triggers the workflow on push to main
+on: # Triggers the workflow on push to main
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
-  build-deploy: 
+  build-deploy:
     name: build and deploy spring boot
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout repo # Get code from the GitHub repository
+      - name: Checkout Repository # Get code from the GitHub repository
         uses: actions/checkout@v4
 
-      - name: setup jdk 17 # Configure the Java Development Kit environment
+      - name: Set up JDK 17 # Configure the Java Development Kit environment
         uses: actions/setup-java@v4
         with:
-          cache: maven
+          java-version: '17'
           distribution: 'temurin'
-          java-version: '17' 
+          cache: maven 
 
-      - name: unit tests
+      - name: Unit Tests # Run Maven unit tests
         run: mvn -B test --file pom.xml
 
-      - name: build the application # Compile the code, run tests and package the application
+      - name: Build Application Package # Compile and package the application
         run: |
-          mvn clean 
+          mvn clean
           mvn -B package --file pom.xml
-      
-          
-      
-      
 
+      - name: Log in to Docker Hub # Log in to Docker Hub FIRST before building/pushing
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
+      - name: Set up Docker Buildx # Set up Buildx for Docker build 
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Image # Build the Docker image and push it
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          dockerfile: Dockerfile
+          push: true 
+          tags: ${{ secrets.DOCKER_USERNAME }}/springdemo:1.0
