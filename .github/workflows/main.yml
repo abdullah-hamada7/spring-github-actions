@@ -1,0 +1,36 @@
+name: Build & Deploy Spring app
+
+on: #Triggers the workflow on push to main
+  push:
+    branches: 
+      - main
+
+jobs:
+  build-deploy: 
+    name: build and deploy spring boot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo # Get code from the GitHub repository
+        uses: actions/checkout@v4
+
+      - name: setup jdk 17 # Configure the Java Development Kit environment
+        uses: actions/setup-java@v4
+        with:
+          cache: maven
+          distribution: 'temurin'
+          java-version: '17' 
+
+      - name: unit tests
+        run: mvm -B test --file pom.xml
+
+      - name: build the application # Compile the code, run tests and package the application
+        run: |
+          mvn clean 
+          mvn -B package --file pom.xml
+      
+          
+      
+      
+
+
